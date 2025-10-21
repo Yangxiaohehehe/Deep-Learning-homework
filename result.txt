@@ -51,8 +51,20 @@ number of parameters: 14.36M
 
 
 
+3.4 改深一点 每层都添加一个in=out的channel
+number of parameters: 6.56M
+85.68%0.330
+
+3.5 在3.4 基础上又多了一层in=out 且bn
+32.86M
+[epoch=128, iter=  200] loss: 0.044
+[Epoch 128] Validation loss: 0.488, Accuracy: 89.96%
 
 
+3.6 如果没有bn
+number of parameters: 32.85M
+[epoch=128, iter=  200] loss: 0.050
+[Epoch 128] Validation loss: 0.687, Accuracy: 87.21%
 
 4 残差
 8.14M
@@ -60,6 +72,28 @@ number of parameters: 14.36M
 
 
 
+多加了一层  12.86M  
+学习率也低了 
+但是没有明显提升
+88.20%
+
+
+全改成残差：
+ 9.71M 89.61%   0.050
+
+
+残差： 每一层残差完有一层in=out的通道
+11.18M90.80%
+[epoch=128, iter=  200] loss: 0.044
+[Epoch 128] Validation loss: 0.484, Accuracy: 90.80%
+
+
+
+5 注意力机制
+7.31M
+88.22%
+0.115
+0.515
 
 
 
@@ -67,11 +101,32 @@ number of parameters: 14.36M
 
 
 
+6 优化器
+SGD with 动量
+学习率调大
+[epoch=128, iter=  200] loss: 0.250
+[Epoch 128] Validation loss: 0.447, Accuracy: 87.86%
+
+
+AdamW 权重衰减调整大
+[epoch=128, iter=  200] loss: 0.139
+[Epoch 128] Validation loss: 0.635, Accuracy: 86.68%
 
 
 
 
+7. 数据增强：
+加入颜色抖动和随机裁切：
+[epoch=128, iter=  600] loss: 0.335
+[Epoch 128] Validation loss: 0.491, Accuracy: 87.11%
+
+
+利用cutmix
+[epoch=128, iter=  600] loss: 0.205
+[Epoch 128] Validation loss: 0.536, Accuracy: 87.02%
 
 
 
+[epoch=128, iter=  600] loss: 0.335
+[Epoch 128] Validation loss: 0.491, Accuracy: 87.11%
 
