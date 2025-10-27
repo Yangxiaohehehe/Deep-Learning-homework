@@ -6,26 +6,19 @@
 5. 数据增强的方法
 
 C:数据集
+# 数据集Cifar10
 
 一、 最初结果
 1. 最初的结果：0.225 86.32%	number of parameters: 7.28M
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
-
-二、 网络更深更宽
-3. 网络更宽或更深  多加一层512 512和开始多一层3->64   重新计算输出维度  0.402	85.56%
----
-
-新增了损失绘制过程
-
-3.1 只多开始的一层  85.60%  7.35M
-
-
-
-3.2 多开始一层 结尾也多一层 
-batch128
-number of parameters: 7.36M  84.51%
+## 单独一种因素的结果
+###  网络更深更宽
+#### 无用尝试
+ 网络更宽或更深  多加一层512 512和开始多一层3->64   重新计算输出维度  0.402	85.56%
+ 只多开始的一层  85.60%  7.35M
+ 多开始一层 结尾也多一层 batch128 number of parameters: 7.36M  84.51%
 
 调高dropout 0.3-0.4 0.5-0.6 收敛速度会满  7.36M  84.51%  
 正常drop:  85%
@@ -34,60 +27,46 @@ number of parameters: 7.36M  84.51%
 
 
 
+ 改宽、深一点：多加两层 中间  512-1024-1024两层 学习率1e-4 128batch  number of parameters: 14.36M 84.69%  0.049  过拟合
 
 
-3.3 改宽、深一点：
-多加两层 中间  512-1024-1024两层
-学习率1e-4 128batch
-number of parameters: 14.36M
-84.69%  0.049 
-过拟合
+ 改深一点 每层都添加一个in=out的channel   number of parameters: 6.56M 85.68%0.330 
 
-
-
-3.4 改深一点 每层都添加一个in=out的channel
-number of parameters: 6.56M
-85.68%0.330
-
-3.5 在3.4 基础上又多了一层in=out 且bn
+#### 有效
+在上一个基础上（每层都添加一个in=out的channel） 又多了一层in=out 且bn 
 32.86M
-[epoch=128, iter=  200] loss: 0.044
-[Epoch 128] Validation loss: 0.488, Accuracy: 89.96%
+[epoch=128, iter=  200] loss: 0.045
+[Epoch 128] Validation loss: 0.506, Accuracy: 90.01%
 
 
-3.6 如果没有bn
+如果没有bn效果
 number of parameters: 32.85M
 [epoch=128, iter=  200] loss: 0.050
 [Epoch 128] Validation loss: 0.687, Accuracy: 87.21%
 
-三、 残差
-8.14M
-学习率1e-4 128 
-
-
-
-多加了一层  12.86M  
+### 残差
+多加了两层resblock  12.86M  
 学习率也低了 
 但是没有明显提升
 88.20%
 
 
-全改成残差：
+全部卷积层全改成残差：
  9.71M 89.61%   0.050
 
 
-残差： 每一层残差完有一层in=out的通道
+残差： 上一个基础上每一层残差完有一层in=out的通道
 11.18M90.80%
-[epoch=128, iter=  200] loss: 0.044
-[Epoch 128] Validation loss: 0.484, Accuracy: 90.80%
+[epoch=128, iter=  200] loss: 0.039
+[Epoch 128] Validation loss: 0.489, Accuracy: 90.56%
 
 
 
-四、 注意力机制
+###  注意力机制
+没一层卷积后多一层注意力机制
 7.31M
-88.22%
-0.115
-0.515
+[epoch=128, iter=  200] loss: 0.114
+[Epoch 128] Validation loss: 0.443, Accuracy: 88.73%
 
 
 
@@ -95,11 +74,11 @@ number of parameters: 32.85M
 
 
 
-五、 优化器
+### 优化器
 SGD with 动量
 学习率调大
-[epoch=128, iter=  200] loss: 0.250
-[Epoch 128] Validation loss: 0.447, Accuracy: 87.86%
+[epoch=128, iter=  200] loss: 0.244
+[Epoch 128] Validation loss: 0.450, Accuracy: 87.17%
 
 
 AdamW 权重衰减调整大
@@ -109,40 +88,141 @@ AdamW 权重衰减调整大
 
 
 
-六. 数据增强：
-加入颜色抖动和随机裁切：
-[epoch=128, iter=  600] loss: 0.335
-[Epoch 128] Validation loss: 0.491, Accuracy: 87.11%
+###  数据增强：
+
 
 
 利用cutmix
-[epoch=128, iter=  600] loss: 0.205
-[Epoch 128] Validation loss: 0.536, Accuracy: 87.02%
-
-
-
 [epoch=128, iter=  600] loss: 0.335
 [Epoch 128] Validation loss: 0.491, Accuracy: 87.11%
 
 
-数据增强 融合了强化：
-[epoch=128, iter=  200] loss: 0.760
-[Epoch 128] Validation loss: 0.369, Accuracy: 87.91%
+数据增强 融合了强化 不采用cutmix：
+[epoch=128, iter=  200] loss: 0.734
+[Epoch 128] Validation loss: 0.324, Accuracy: 89.44%
 
 
-七 混合尝试
-注意力+res： 11.27M
+## 混合尝试
+### 注意力+res： 
+11.27M  
+[epoch=128, iter=  200] loss: 0.047
+[Epoch 128] Validation loss: 0.510, Accuracy: 89.68%
 
 
+## res +augumentation
+11.18M
+[epoch=128, iter=  200] loss: 0.413
+[Epoch 128] Validation loss: 0.241, Accuracy: 92.47%
 
-tiny -image
-# 深度宽度
+## res+augu+sgd
+[epoch=128, iter=  200] loss: 0.465
+[Epoch 128] Validation loss: 0.250, Accuracy: 92.13%
+
+## res+augu+sgd+attention
+[epoch=128, iter=  200] loss: 0.461
+[Epoch 128] Validation loss: 0.219, Accuracy: 92.96%
+
+
+# tiny -image
+做的改动 ：将batch进一步->256
+加入早停机制 测试损失20次没有改进就停止
+## 最base的情况
+ 13.60M  
+[epoch=100, iter=  200] loss: 2.361
+[epoch=100, iter=  400] loss: 2.368
+[epoch=100, iter=  600] loss: 2.406
+[Epoch 100] Validation loss: 2.794, Accuracy: 38.16%
+
+
+## 只深度宽度
 number of parameters: 58.80M
 最好：
-[epoch= 48, iter=  200] loss: 1.049
-[epoch= 48, iter=  400] loss: 1.106
-[epoch= 48, iter=  600] loss: 1.096
-[Epoch  48] Validation loss: 1.943, Accuracy: 54.88%
-过拟合：
+[epoch= 53, iter=  200] loss: 0.848
+[Epoch  53] Validation loss: 2.193, Accuracy: 53.83%
+
+
+## 只单独res
+11.30M
+[epoch= 55, iter=  200] loss: 1.438
+[Epoch  55] Validation loss: 2.784, Accuracy: 45.10%
+
+##deep+aug
+number of parameters: 58.80M
+[epoch=110, iter=  200] loss: 1.429
+[Epoch 110] Validation loss: 1.710, Accuracy: 59.26%
+
+
+## deep+aug+op
+number of parameters: 58.80M
+[epoch= 97, iter=  200] loss: 1.813
+[Epoch  97] Validation loss: 1.977, Accuracy: 53.08%
+
+
+## res+deep结和 两种方法：
+
+
+### 拓宽维度到1024
+number of parameters: 84.88M
+
+拓宽 1024 SGD
+[epoch= 78, iter=  200] loss: 1.579
+[Epoch  78] Validation loss: 2.121, Accuracy: 52.67%
+
+拓宽 1024 ADAM
+[epoch= 66, iter=  200] loss: 1.222
+[Epoch  66] Validation loss: 2.046, Accuracy: 56.79%
+
+拓宽 1024 ADAM 取消全局池化
+147.80M
+[epoch= 60, iter=  200] loss: 1.231
+[Epoch  60] Validation loss: 1.986, Accuracy: 57.13%
+
+number of parameters: 97.47M
+[epoch= 67, iter=  200] loss: 1.151
+[Epoch  67] Validation loss: 2.056, Accuracy: 56.89%
+
+### res+deep不拓宽：
+ADAM：
+35.48M
+[epoch= 64, iter=  200] loss: 1.621
+[Epoch  64] Validation loss: 2.045, Accuracy: 53.11%
+
+
+## 所有因素的结和
+
+### 拓宽
+拓宽版本：
+85.36M
+[epoch= 59, iter=  200] loss: 1.214
+[Epoch  59] Validation loss: 2.094, Accuracy: 55.43%
+
+拓宽并且取消全局池化 adam
+number of parameters: 97.94M
+[epoch= 58, iter=  200] loss: 1.168
+[Epoch  58] Validation loss: 2.185, Accuracy: 55.42%
+
+
+number of parameters: 148.27M
+[epoch= 61, iter=  200] loss: 1.113
+[Epoch  61] Validation loss: 2.259, Accuracy: 55.94%
+
+
+
+### 不拓宽
+不拓宽依旧512 ADam：
+35.60M
+[epoch= 77, iter=  200] loss: 1.446
+[Epoch  77] Validation loss: 2.101, Accuracy: 53.83%
+
+不拓宽+adamw
+35.60M
+[epoch= 76, iter=  200] loss: 1.398
+[Epoch  76] Validation loss: 2.149, Accuracy: 52.87%
+
+
+
+
+
+
 
 
